@@ -1,5 +1,5 @@
-from draper import Field
+from draper import fields
 
 
-class HasManyField(Field):
+class HasManyField(fields.Field):
     pass

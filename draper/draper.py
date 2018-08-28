@@ -4,10 +4,13 @@ import importlib.util
 import inspect
 from typing import Type
 
+import rethinkdb
+
 from flask import Flask
 
 from draper.model import Model
 from draper.flask_blueprints.model_blueprint_factory import ModelBlueprintFactory
+from draper.settings import Settings
 
 
 class Draper:
@@ -16,6 +19,7 @@ class Draper:
     def __init__(self):
         self.models: [Type[Model]] = []
         self.blueprints = {}
+        self.settings = None
         self.flask_app = Flask(__name__)
 
     @property
@@ -43,11 +47,33 @@ class Draper:
             if inspect.isclass(model) and issubclass(model, Model):
                 self.add_model(model)
                 print(f'{model} is loaded...')
+                tables = rethinkdb.db(self.settings.DATABASE_NAME).table_list().run()
+
+                if model.table_name not in tables:
+                    rethinkdb.db(self.settings.DATABASE_NAME).table_create().run()
+
+    def scan_for_settings(self):
+        models_path = os.path.join(self.current_project_directory, 'settings.py')
+        spec = importlib.util.spec_from_file_location('settings', location=models_path)
+        settings = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(settings)
+
+        parsed_settings = {
+            key: value
+            for key, value in settings.__dict__.items()
+            if not key.startswith('__')
+        }
+        self.settings = Settings(**parsed_settings)
+
+    def init_database(self):
+        rethinkdb.connect(self.settings.DATABASE_HOST, self.settings.DATABASE_PORT).repl()
 
     def start(self):
+        self.scan_for_settings()
+        self.init_database()
         print(f'Draper started at {self.current_project_directory}...')
         self.scan_for_models()
-        self.flask_app.run()
+        #  self.flask_app.run()
 
 
 draper = Draper()

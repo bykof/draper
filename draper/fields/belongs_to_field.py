@@ -1,5 +1,5 @@
-from draper import Field
+from draper import fields
 
 
-class BelongsToField(Field):
+class BelongsToField(fields.Field):
     pass
