@@ -4,13 +4,15 @@ import importlib.util
 import inspect
 from typing import Type
 
-import rethinkdb
+from mongoengine import connect
 
 from flask import Flask
 
+from draper.events.event_listeners.mongodb_event_listener import MongoDBEventListener
 from draper.model import Model
 from draper.flask_blueprints.model_blueprint_factory import ModelBlueprintFactory
 from draper.settings import Settings
+from draper.utils import camelcase_to_underscore
 
 
 class Draper:
@@ -33,7 +35,7 @@ class Draper:
     def add_model(self, model: Type[Model]):
         self.flask_app.register_blueprint(
             ModelBlueprintFactory(model),
-            url_prefix=f'/{model.underscore_name}s'
+            url_prefix=f'/{camelcase_to_underscore(model.__name__)}s'
         )
         self.models.append(model)
 
@@ -47,10 +49,6 @@ class Draper:
             if inspect.isclass(model) and issubclass(model, Model):
                 self.add_model(model)
                 print(f'{model} is loaded...')
-                tables = rethinkdb.db(self.settings.DATABASE_NAME).table_list().run()
-
-                if model.table_name not in tables:
-                    rethinkdb.db(self.settings.DATABASE_NAME).table_create().run()
 
     def scan_for_settings(self):
         models_path = os.path.join(self.current_project_directory, 'settings.py')
@@ -66,12 +64,14 @@ class Draper:
         self.settings = Settings(**parsed_settings)
 
     def init_database(self):
-        rethinkdb.connect(self.settings.DATABASE_HOST, self.settings.DATABASE_PORT).repl()
+        connect(self.settings.DATABASE_NAME)
 
     def start(self):
         self.scan_for_settings()
         self.init_database()
         print(f'Draper started at {self.current_project_directory}...')
+        event_listener = MongoDBEventListener()
+        event_listener.listen()
         self.scan_for_models()
         #  self.flask_app.run()
 

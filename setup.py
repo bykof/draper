@@ -18,7 +18,7 @@ VERSION = '0.0.1'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'flask', 'rethinkdb'
+    'flask', 'mongoengine'
 ]
 
 # What packages are optional?

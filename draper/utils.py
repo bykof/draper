@@ -1,8 +1,7 @@
+import re
 
 
-class classproperty:
-    def __init__(self, getter):
-        self.getter = getter
+def camelcase_to_underscore(name: str):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
-    def __get__(self, instance, owner):
-        return self.getter(owner)

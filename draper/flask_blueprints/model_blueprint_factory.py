@@ -1,11 +1,17 @@
+from typing import Type
+
 from flask import (
     Blueprint,
 )
 
+from draper.model import Model
+from draper.utils import camelcase_to_underscore
+
 
 class ModelBlueprintFactory(Blueprint):
-    def __init__(self, model):
-        super(ModelBlueprintFactory, self).__init__(model.underscore_name, __name__)
+    def __init__(self, model: Type[Model]):
+        super(ModelBlueprintFactory, self).__init__(camelcase_to_underscore(model.__name__), __name__)
+
         self.model = model
         self.add_url_rule('/', view_func=self.list, methods=['GET'])
         self.add_url_rule('/<int:object_id>', view_func=self.get, methods=['GET'])
