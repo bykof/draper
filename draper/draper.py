@@ -8,7 +8,6 @@ from mongoengine import connect
 
 from flask import Flask
 
-from draper.events.event_listeners.mongodb_event_listener import MongoDBEventListener
 from draper.model import Model
 from draper.flask_blueprints.model_blueprint_factory import ModelBlueprintFactory
 from draper.settings import Settings
@@ -70,8 +69,6 @@ class Draper:
         self.scan_for_settings()
         self.init_database()
         print(f'Draper started at {self.current_project_directory}...')
-        event_listener = MongoDBEventListener()
-        event_listener.listen()
         self.scan_for_models()
         #  self.flask_app.run()
 
