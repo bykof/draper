@@ -1,7 +1,8 @@
 from draper.db.fields.exceptions.not_valid_value_exception import NotValidValue
+from abs import ABCMeta
 
+class Field(metaclass=ABCMeta):
 
-class Field:
     def __init__(self):
         self.value = None
 
@@ -12,6 +13,7 @@ class Field:
     def deserialize(self):
         return self.value
 
+    @abstractmethod
     def to_python(self):
         raise NotImplemented("Implement the value returned in Python enviroment to current field.")
 
