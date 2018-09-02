@@ -12,12 +12,15 @@ class Field:
     def deserialize(self):
         return self.value
 
+    def to_python(self):
+        raise NotImplemented("Implement the value returned in Python enviroment to current field.")
+
     @staticmethod
-    def value_is_valid(value):
+    def is_valid(value):
         return True
 
     def __set__(self, instance, value):
-        if self.value_is_valid(value):
+        if self.is_valid(value):
             self.value = value
         else:
             raise NotValidValue(self.__class__, value)
