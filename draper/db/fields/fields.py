@@ -12,7 +12,7 @@ class StringField(Field):
 class IntegerField(Field):
 
 	def is_valid(self):
-		return isinstance(value,int)
+		return isinstance(value, int)
 
 	def to_python(self):
 		return int(self.value)
